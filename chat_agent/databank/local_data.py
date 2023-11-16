@@ -5,7 +5,7 @@ import datetime
 
 class LocalDataBank:
     def __init__(self, config):
-        self._path = os.path.abspath(config["path"])
+        self._path = os.path.abspath(config.get("path", "local_datas"))
         if not os.path.isdir(self._path):
             os.makedirs(self._path)
         print("Create local data bank @ " + str(self._path))
@@ -44,6 +44,10 @@ class LocalDataBank:
 
     def get_table(self, table_name):
         return self._tables.get(table_name, {})
+
+    def get_tables(self):
+        for table in self._tables.values():
+            yield table
 
     def add_item(self, table_name, key, info):
         table = self.add_table(table_name)

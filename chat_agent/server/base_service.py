@@ -11,8 +11,8 @@ class GlobalService:
 
 class BaseService:
     def __init__(self, db_type, db_config=None, agent_config=None):
-        self._data_bank = self.setup_db(db_type, db_config)
-        self._agent = self.setup_agent(self._data_bank, agent_config)
+        self._data_bank = self.setup_db(db_type, db_config or {})
+        self._agent = self.setup_agent(self._data_bank, agent_config or {})
 
     def setup_agent(self, data_bank, config):
         raise NotImplementedError("setup_agent is not implemented!!")
@@ -55,6 +55,11 @@ class BaseService:
         return self._agent
 
 
+def init_service(service_type, db_type, db_config=None, agent_config=None):
+    service_cls = get_registered_service(service_type)
+    service_cls.create_service(db_type, db_config, agent_config)
+
+
 class BaseAgentHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.write_response("do_GET is not supported")
@@ -67,16 +72,7 @@ class BaseAgentHandler(BaseHTTPRequestHandler):
         body = self.rfile.read(content_length)
         info = json.loads(body)
         task_type = info["task_type"]
-        if task_type == "setup":
-            if self.get_service():
-                response = {"success": True, "agent": str(self.get_service())}
-            else:
-                service_cls = get_registered_service(info["service_type"])
-                service_cls.create_service(
-                    info["db_type"], info.get("db_config"), info.get("agent_config")
-                )
-                response = {"success": True, "agent": str(self.get_service())}
-        elif task_type == "analysis":
+        if task_type == "analysis":
             response = self.get_service().analysis(info["config"])
         elif task_type == "chat":
             response = self.get_service().chat(info["config"])

@@ -1,5 +1,6 @@
 import json
 import requests
+import logging
 
 
 class BaseClient:
@@ -7,6 +8,7 @@ class BaseClient:
         self._host = host
         self._port = port
         self._url = "http://{}:{}".format(host, port)
+        self.logger = logging.getLogger("client")
 
     def setup(self, db_type, db_config=None, agent_config=None):
         # set up data bank

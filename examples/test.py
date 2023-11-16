@@ -3,6 +3,13 @@ import itchat
 if __name__ == "__main__":
     itchat.auto_login()
     print("login done!!")
+    chatroom_name = "幸福"
+    chatrooms = itchat.search_chatrooms(chatroom_name)
+    print("chatrooms " + str(chatrooms))
+    chatroom_name = itchat.search_chatrooms(chatroom_name)[0]["UserName"]
+    print("chatroom_name " + str(chatroom_name))
+    itchat.send(msg="群消息自动发送", toUserName=chatroom_name)
+
     """
     friends = itchat.get_friends()
     for friend in friends:

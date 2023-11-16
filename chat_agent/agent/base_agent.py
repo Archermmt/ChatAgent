@@ -1,5 +1,9 @@
+import logging
+
+
 class BaseAgent:
     def __init__(self, data_bank, config=None):
+        self.logger = logging.getLogger("agent")
         self._data_bank = data_bank
         self.setup(config)
 
@@ -13,6 +17,7 @@ class BaseAgent:
         if analysis_type == "update_table":
             for name, info in config["content"].items():
                 self._data_bank.add_item(config["table"], name, info)
+            return self._data_bank.get_table(config["table"])
         elif analysis_type == "get_table":
             return self._data_bank.get_table(config["table"])
         elif analysis_type == "get_friends":
@@ -21,8 +26,11 @@ class BaseAgent:
                 self._data_bank.add_item(table_name, name, info)
             return friends
         elif analysis_type == "find_friend":
-            table_name = config.pop("table") if "table" in config else "friends"
-            return self._find_friend(self._data_bank.get_table(table_name), **config)
+            for table in self._data_bank.get_tables():
+                friend = self._find_friend(table, **config)
+                if friend:
+                    return friend
+            return {}
         raise TypeError("Unexpected analysis_type " + str(analysis_type))
 
     def chat(self, chat_type, config):
